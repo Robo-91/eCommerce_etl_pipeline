@@ -1,5 +1,2 @@
-# Yaml file path
-src\util\config_load.py
-
 # local setup
 Config\Config.yaml
