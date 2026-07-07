@@ -47,5 +47,6 @@ log_data_df.to_sql(
     index = False
 )
 
+# Commit changes and close connection
 con.commit()
 con.close()
