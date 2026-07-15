@@ -12,7 +12,7 @@ with open(yaml_config) as file:
 
 # Connect to data sources
 # Read csv data source
-order_items_df = pd.read_csv(config['csv']['order_items'])
+order_payments_df = pd.read_csv(config['csv']['order_payments'])
 
 # Connect to SQL Server
 ## Create required variables for SSMS connection
@@ -26,19 +26,19 @@ engine = create_engine(database_conn)
 con = engine.connect()
 
 # Truncate Staging Table
-truncate_query = 'TRUNCATE TABLE Order_Items_Staging'
+truncate_query = 'TRUNCATE TABLE Order_Payments_Staging'
 con.execute(text(truncate_query))
 
 # load data
-order_items_df.to_sql(
-    'Order_Items_Staging',
+order_payments_df.to_sql(
+    'Order_Payments_Staging',
     con = con,
     if_exists = 'append',
     index = False
 )
 
 # log results
-log_data = {'row_count': [len(order_items_df)], 'table_name': ['Order_Items_Staging'], 'load_date': [date.today()]}
+log_data = {'row_count': [len(order_payments_df)], 'table_name': ['Order_Payments_Staging'], 'load_date': [date.today()]}
 log_data_df = pd.DataFrame(log_data)
 log_data_df.to_sql(
     name = 'LoadStagingTablesLog',
