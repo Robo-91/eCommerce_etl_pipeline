@@ -28,8 +28,8 @@ def ingest_sellers():
     con = engine.connect()
 
     # Truncate Staging Table
-    # truncate_query = 'TRUNCATE TABLE Sellers_Staging'
-    # con.execute(text(truncate_query))
+    truncate_query = 'TRUNCATE TABLE Sellers_Staging'
+    con.execute(text(truncate_query))
 
     # load data
     sellers_df.to_sql(
