@@ -4,7 +4,7 @@ from datetime import date
 import yaml
 from src.util.config_load import load_filepath
 
-def ingest_orders():
+def ingest_product_category_name_translation():
 
     # Access YAML file for required configurations
     yaml_config = load_filepath()
@@ -14,7 +14,7 @@ def ingest_orders():
 
     # Connect to data sources
     # Read csv data source
-    orders_df = pd.read_csv(config['csv']['orders'])
+    product_category_name_translation_df = pd.read_csv(config['csv']['product_category_name_translation'])
 
     # Connect to SQL Server
     ## Create required variables for SSMS connection
@@ -28,19 +28,19 @@ def ingest_orders():
     con = engine.connect()
 
     # Truncate Staging Table
-    truncate_query = 'TRUNCATE TABLE Orders_Staging'
+    truncate_query = 'TRUNCATE TABLE Product_Category_Name_Translation_Staging'
     con.execute(text(truncate_query))
 
     # load data
-    orders_df.to_sql(
-        'Orders_Staging',
+    product_category_name_translation_df.to_sql(
+        'Product_Category_Name_Translation_Staging',
         con = con,
         if_exists = 'append',
         index = False
     )
 
     # log results
-    log_data = {'row_count': [len(orders_df)], 'table_name': ['Orders_Staging'], 'load_date': [date.today()]}
+    log_data = {'row_count': [len(product_category_name_translation_df)], 'table_name': ['Product_Category_Name_Translation_Staging'], 'load_date': [date.today()]}
     log_data_df = pd.DataFrame(log_data)
     log_data_df.to_sql(
         name = 'LoadStagingTablesLog',
