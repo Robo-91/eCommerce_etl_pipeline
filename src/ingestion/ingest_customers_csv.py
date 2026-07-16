@@ -4,49 +4,50 @@ from datetime import date
 import yaml
 from src.util.config_load import load_config, load_filepath
 
-# Access YAML file for required configurations
-yaml_config = load_filepath()
+def ingest_customers():
+    # Access YAML file for required configurations
+    yaml_config = load_filepath()
 
-with open(yaml_config) as file:
-    config = yaml.safe_load(file)
+    with open(yaml_config) as file:
+        config = yaml.safe_load(file)
 
-# Connect to data sources
-# Read csv data source
-customers_df = pd.read_csv(config['csv']['customers'])
+    # Connect to data sources
+    # Read csv data source
+    customers_df = pd.read_csv(config['csv']['customers'])
 
-# Connect to sql server
-## Create required variables for SSMS connection
-server = config['database']['server']
-database = config['database']['database']
-driver = config['database']['driver']
-database_conn = f'mssql+pyodbc://@{server}/{database}?driver={driver}'
+    # Connect to sql server
+    ## Create required variables for SSMS connection
+    server = config['database']['server']
+    database = config['database']['database']
+    driver = config['database']['driver']
+    database_conn = f'mssql+pyodbc://@{server}/{database}?driver={driver}'
 
-## Create connection via SQL alchemy
-engine = create_engine(database_conn)
-con = engine.connect()
+    ## Create connection via SQL alchemy
+    engine = create_engine(database_conn)
+    con = engine.connect()
 
-# truncate staging table
-truncate_query = "TRUNCATE TABLE Customers_Staging"
-con.execute(text(truncate_query))
+    # truncate staging table
+    truncate_query = "TRUNCATE TABLE Customers_Staging"
+    con.execute(text(truncate_query))
 
-# load data
-customers_df.to_sql(
-    name = 'Customers_Staging',
-    con = con,
-    if_exists = 'append',
-    index = False
-)
+    # load data
+    customers_df.to_sql(
+        name = 'Customers_Staging',
+        con = con,
+        if_exists = 'append',
+        index = False
+    )
 
-# log results
-log_data = {'row_count': [len(customers_df)], 'table_name': ['Customers_Staging'], 'load_date': [date.today()]}
-log_data_df = pd.DataFrame(log_data)
-log_data_df.to_sql(
-    'LoadStagingTablesLog',
-    con = con,
-    if_exists = 'append',
-    index = False
-)
+    # log results
+    log_data = {'row_count': [len(customers_df)], 'table_name': ['Customers_Staging'], 'load_date': [date.today()]}
+    log_data_df = pd.DataFrame(log_data)
+    log_data_df.to_sql(
+        'LoadStagingTablesLog',
+        con = con,
+        if_exists = 'append',
+        index = False
+    )
 
-# Commit changes and close connection
-con.commit()
-con.close()
+    # Commit changes and close connection
+    con.commit()
+    con.close()
