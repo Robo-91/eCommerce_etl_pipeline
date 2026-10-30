@@ -1,5 +1,5 @@
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, VARCHAR
 from datetime import date
 import yaml
 from src.util.config_load import load_config, load_filepath
@@ -13,7 +13,7 @@ def ingest_geolocations():
 
     # Connect to data sources
     # Read csv data source
-    geolocation_df = pd.read_csv(config['csv']['geolocation'])
+    geolocation_df = pd.read_csv(config['csv']['geolocation'], dtype={'geolocation_zip_code_prefix': 'str'})
 
     # Connect to sql server
     ## Create required variables for SSMS connection
@@ -27,15 +27,16 @@ def ingest_geolocations():
     con = engine.connect()
 
     # truncate staging table
-    truncate_query = 'TRUNCATE TABLE Geolocation_Staging'
-    con.execute(text(truncate_query))
+    #truncate_query = 'TRUNCATE TABLE Geolocation_Staging'
+    #con.execute(text(truncate_query))
 
     # load data
     geolocation_df.to_sql(
         'Geolocation_Staging',
         con = con,
         if_exists = 'append',
-        index = False
+        index = False,
+        dtype = {'geolocation_zip_code_prefix': VARCHAR(25)}
     )
 
     # log results
